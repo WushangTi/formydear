@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!--[if lt IE 9]>  
+        <script src="js/html5shiv.min.js"></script>  
+        <script src="js/excanvas.min.js"></script>
+    <![endif]-->
+    <script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/deepCopy.js"></script>
+    <script src="js/Firework.js"></script>
+</head>
+<style>
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .heart-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 600px;
+        height: 510px;
+        overflow: hidden;
+    }
+
+    .heart-wrapper iframe {
+        margin-top: -50px;
+    }
+
+    .canvas-wrapper {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 1200px;
+        height: 510px;
+        margin-left: 10px;
+        overflow: hidden;
+    }
+
+    .canvas-wrapper canvas {
+        position: relative;
+        right: 0;
+        z-index: 10;
+    }
+
+    .border {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 600px;
+        height: 510px;
+        margin: -255px 0 0 -300px;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+
+    <canvas id="canvas"></canvas>
+    <div class="border">
+        <div class="canvas-wrapper z-index-10">
+            <canvas id="digit"></canvas>
+        </div>
+        <div class="heart-wrapper">
+            <iframe src="" id="myiframe" frameborder="0" width=600 height=560></iframe>
+        </div>
+        <!-- <div class="heart-wrapper">
+            <iframe src="http://js1k.com/2012-love/demo/1011" frameborder="0" width=600 height=560></iframe>
+        </div>
+        <div class="heart-wrapper z-index-1">
+            <iframe src="http://js1k.com/2012-love/demo/1022" frameborder="0" width=600 height=560></iframe>
+        </div> -->
+
+    </div>
+
+
+    <!-- <script src="js/jquery-1.10.2.min.js"></script> -->
+    <script>
+        digit = [
+            [
+                [0, 0, 1, 1, 1, 0, 0],
+                [0, 1, 1, 0, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 0, 1, 1, 0],
+                [0, 0, 1, 1, 1, 0, 0]
+            ], //0
+            [
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 1, 1, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [1, 1, 1, 1, 1, 1, 1]
+            ], //1
+            [
+                [0, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 1, 1, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 1, 1, 1, 1, 1]
+            ], //2
+            [
+                [1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 1, 0, 0],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 1, 0]
+            ], //3
+            [
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1, 1, 0],
+                [0, 1, 1, 0, 1, 1, 0],
+                [1, 1, 0, 0, 1, 1, 0],
+                [1, 1, 1, 1, 1, 1, 1],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 1, 1]
+            ], //4
+            [
+                [1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 1, 0]
+            ], //5
+            [
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 1, 1, 0, 0, 0, 0],
+                [1, 1, 0, 0, 0, 0, 0],
+                [1, 1, 0, 1, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 1, 0]
+            ], //6
+            [
+                [1, 1, 1, 1, 1, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0],
+                [0, 0, 1, 1, 0, 0, 0]
+            ], //7
+            [
+                [0, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 1, 1, 0]
+            ], //8
+            [
+                [0, 1, 1, 1, 1, 1, 0],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [1, 1, 0, 0, 0, 1, 1],
+                [0, 1, 1, 1, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 1, 1, 0, 0],
+                [0, 1, 1, 0, 0, 0, 0]
+            ], //9
+            [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 1, 1, 0],
+                [0, 1, 1, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ] //:
+        ];
+
+        var WINDOW_WIDTH = 1200;
+        var WINDOW_HEIGHT = 768;
+        var MARGIN_TOP = 50;
+        var MARGIN_LEFT = 50;
+        var RADIUS = 8;
+
+        var curShowTimeSeconds = 0;
+
+        var balls = [];
+        //该数组是给跳动的小球随机赋上颜色用的
+        var colors = ["#33B5E5", "#0099CC", "#AA66CC", "#9933CC", "#99CC00", "#669900", "#FFBB33", "#FF8800",
+            "#FF4444", "#CC0000"
+        ];
+
+        var nowTime = null;
+        var canvasLife = 10000;
+
+
+        window.onload = function () {
+            // body...
+            var mycanvas = document.getElementById("digit");
+            var myiframe = document.getElementById("myiframe");
+            mycanvas.width = WINDOW_WIDTH;
+            mycanvas.height = WINDOW_HEIGHT;
+            var context = mycanvas.getContext("2d");
+
+            nowTime = new Date();
+            curShowTimeSeconds = getCurrentTimeSecond();
+            //用个定时器不停的刷新屏幕上面的小球
+            var flowertimer = setInterval(function () {
+                console.log(curShowTimeSeconds);
+                if (curShowTimeSeconds >= 0) {
+                    render(context);
+                    update();
+                } else {
+                    mycanvas.style.display = 'none';
+                    myiframe.src = 'http://js1k.com/2012-love/demo/1022';
+                    clearInterval(flowertimer);
+                }
+            }, 50);
+        }
+        //时分秒三个区域当前时间若是和先前的不一样则会产生小球跳动一次
+        function update() {
+            // body...
+            var nextShowTimeSecond = getCurrentTimeSecond();
+            var nextHours = parseInt(nextShowTimeSecond / 3600);
+            var nextMinutes = parseInt((nextShowTimeSecond - nextHours * 3600) / 60);
+            var nextSeconds = nextShowTimeSecond % 60;
+
+            var curHours = parseInt(curShowTimeSeconds / 3600);
+            var curMinutes = parseInt((curShowTimeSeconds - curHours * 3600) / 60);
+            var curSeconds = curShowTimeSeconds % 60;
+            if (nextSeconds != curSeconds) {
+                // if (parseInt(curHours / 10) != parseInt(nextHours / 10)) {
+                //     addBalls(MARGIN_LEFT + 0, MARGIN_TOP, parseInt(curHours / 10));
+                // }
+                // if (parseInt(curHours % 10) != parseInt(nextHours % 10)) {
+                //     addBalls(MARGIN_LEFT + 15 * (RADIUS + 1), MARGIN_TOP, parseInt(curHours % 10));
+                // }
+                // if (parseInt(curMinutes / 10) != parseInt(nextMinutes / 10)) {
+                //     addBalls(MARGIN_LEFT + 40, MARGIN_TOP, parseInt(curHours / 10));
+                // }
+                // if (parseInt(curMinutes % 10) != parseInt(nextMinutes % 10)) {
+                //     addBalls(MARGIN_LEFT + 55 * (RADIUS + 1), MARGIN_TOP, parseInt(curHours % 10));
+                // }
+                // if (parseInt(curSeconds / 10) != parseInt(nextSeconds / 10)) {
+                //     addBalls(MARGIN_LEFT + 80, MARGIN_TOP, parseInt(curHours / 10));
+                // }
+                if (parseInt(curSeconds % 10) != parseInt(nextSeconds % 10)) {
+                    addBalls(MARGIN_LEFT + 95 * (RADIUS + 1), MARGIN_TOP, parseInt(curHours % 10));
+                }
+                curShowTimeSeconds = nextShowTimeSecond;
+            }
+
+            updateBalls();
+        }
+
+        //小球跳动规律
+        function updateBalls() {
+            // body...
+            for (var i = 0; i < balls.length; i++) {
+                balls[i].x += balls[i].vx;
+                balls[i].y += balls[i].vy;
+                balls[i].vy += balls[i].g;
+                if (balls[i].y >= (WINDOW_HEIGHT - RADIUS)) {
+                    balls[i].y = WINDOW_HEIGHT - RADIUS;
+                    balls[i].vy = -balls[i].vy * 0.75;
+                }
+            }
+        }
+
+        //在屏幕上添加小球
+        function addBalls(x, y, num) {
+            // body...
+            for (var i = 0; i < digit[num].length; i++) {
+                for (var j = 0; j < digit[num][i].length; j++) {
+                    if (digit[num][i][j] == 1) {
+                        var oBalls = {
+                            x: x + j * 2 * (RADIUS + 1) + RADIUS + 1,
+                            y: y + i * 2 * (RADIUS + 1) + RADIUS + 1,
+                            g: 1.5 + Math.random(),
+                            vx: Math.pow(-1, Math.ceil(Math.random() * 1000)) * 4,
+                            vy: -5,
+                            color: colors[Math.floor(Math.random() * colors.length)]
+                        };
+                        balls.push(oBalls);
+                    }
+                }
+            }
+        }
+
+        //获取当前时间
+        function getCurrentTimeSecond() {
+            var now = new Date();
+            var endTime = nowTime; //new Date();
+            var leftTime = endTime.getTime() - now.getTime() + canvasLife;
+            var ms = Math.round(leftTime / 1000);
+
+            return ms;
+        }
+
+        //操作画布实现小球的改变
+        function render(context) {
+            // body...
+
+            context.clearRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+            var day = Math.floor(curShowTimeSeconds / 3600 / 24);
+            var hours = Math.floor((curShowTimeSeconds - (day * 24 * 3600)) / 3600);
+            var minute = Math.floor((curShowTimeSeconds - (hours * 3600)) / 60);
+            var second = Math.floor(curShowTimeSeconds - minute * 60 - hours * 3600);
+
+            // renderDigit(MARGIN_LEFT, MARGIN_TOP, parseInt(hours / 10), context);
+            // renderDigit(MARGIN_LEFT + 15 * (RADIUS + 1), MARGIN_TOP, parseInt(hours % 10), context);
+            // renderDigit(MARGIN_LEFT + 30 * (RADIUS + 1), MARGIN_TOP, 10, context);
+            // renderDigit(MARGIN_LEFT + 40 * (RADIUS + 1), MARGIN_TOP, parseInt(minute / 10), context);
+            // renderDigit(MARGIN_LEFT + 55 * (RADIUS + 1), MARGIN_TOP, parseInt(minute % 10), context);
+            // renderDigit(MARGIN_LEFT + 70 * (RADIUS + 1), MARGIN_TOP, 10, context);
+            renderDigit(MARGIN_LEFT + 80 * (RADIUS + 1), MARGIN_TOP, parseInt(second / 10), context);
+            renderDigit(MARGIN_LEFT + 95 * (RADIUS + 1), MARGIN_TOP, parseInt(second % 10), context);
+
+            for (var i = 0; i < balls.length; i++) {
+                context.fillStyle = balls[i].color;
+                context.beginPath();
+                context.arc(balls[i].x, balls[i].y, RADIUS, 0, 2 * Math.PI);
+                context.closePath();
+
+                context.fill();
+            }
+        }
+
+        function renderDigit(x, y, num, context) {
+            // body...
+            context.fillStyle = "#F56C6C";
+            if (digit[num]) {
+
+                for (var i = 0; i < digit[num].length; i++) {
+                    for (var j = 0; j < digit[num][i].length; j++) {
+                        if (digit[num][i][j] == 1) {
+                            context.beginPath();
+                            context.arc(x + j * 2 * (RADIUS + 1) + RADIUS + 1, y + i * 2 * (RADIUS + 1) + RADIUS + 1,
+                                RADIUS, 0, 2 * Math.PI);
+                            context.closePath();
+                            context.fill();
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        var g = 0.25; //模拟重力加速度
+        $(function() {
+            var canvas = $$("canvas"),
+                ctx = canvas.getContext("2d"),
+                n = 5, //一次性发射的烟火的数量
+                fireworkList = [], //存放所有烟火对象
+                //烟火形状   圆形   椭圆形  爱心形
+                fireworkTypeList = [createCircleFirework, createEllipseFirework, createHeartFirework],
+                totalNum = 0, //发射烟火的总数量
+                surprise_num = canvasLife / 1000 * 2, //当发射烟火数量达到25时,发射生日快乐字样的烟火
+                flag = true; //是否发射生日快乐字样的烟火
+            canvas.width = $(window).width() - 15;
+            canvas.height = $(window).height() - 20;
+
+
+
+            var init = function (firework, params) { //初始化一个烟火
+                var beforeBalst = firework.getBeforeBalst();
+                firework.setCtx(ctx);
+                firework.setStatus(1); //状态为点燃引线
+                firework.setNum(100 + Math.floor(20 * Math.random())); //爆炸之后的烟花数量
+                firework.setRoundness(getType(params) == "object" ? (getType(params.roundness) == "number" ?
+                    params
+                    .roundness : 0.25) : 0.25); //默认的规则度是0.25,这样爆炸的烟花与真实的最像
+                //firework.setFireworkType(getType(params) == "object" ? params.fireworkType : fireworkTypeList[Math.floor(Math.random() * fireworkTypeList.length)]);//从三种形状中随机烟花形状
+                firework.setFireworkType(getType(params) == "object" ? params.fireworkType :
+                    createCircleFirework); //默认圆形烟花
+                firework.setDelay(Math.floor(30 * Math.random())); //引线燃烧的时间,单位为帧, 最多30帧,即0.5s
+                beforeBalst.setAnimate({
+                    quiescence: { //发射位置为底部中间
+                        x: canvas.width / 2,
+                        y: canvas.height,
+                        deg: 0,
+                        zoom: 1
+                    },
+                    move: { //发射速度向量
+                        vx: -7 + 14 * Math.random(),
+                        vy: -22 + 4 * Math.random(),
+                        pal: 0,
+                        scale: 0
+                    },
+                    translate: { //发射加速度,有一个为g的重力加速度
+                        ax: 0,
+                        ay: g,
+                        apal: 0,
+                        scale: 0
+                    }
+                });
+                beforeBalst.setR(3); //烟火半径为3像素
+                beforeBalst.setColor("#FFFFFF"); //白色
+                beforeBalst.setLife(50 + Math.floor(Math.random() * 50)); //烟花从发射到爆炸的时间,单位为帧,即50-100帧后爆炸
+                beforeBalst.setBase(); //记录烟花发射的初始状态
+            }
+
+            for (var i = 0; i < n; i++) { //初始化n个烟火
+                var firework = Firework.getInstance();
+                init(firework);
+                fireworkList.push(firework);
+                totalNum++;
+            }
+
+            var draw = function () { //描绘每一帧烟火的状态
+                //整个canvas充满黑幕,模拟黑夜
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = '#000003';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                //描绘每个烟火的状态
+                ctx.globalCompositeOperation = 'screen';
+                $.each(fireworkList, function (index, value) {
+                    value.draw();
+                });
+
+            };
+
+            var update = function () { //更新每一帧烟火的状态
+                for (var i = fireworkList.length - 1; i >= 0; i--) {
+                    fireworkList[i].update(); //更新
+                    if (fireworkList[i].getStatus() == 5) { //烟火消失
+                        fireworkList.splice(i, 1); //在烟火集合中将这个烟火去除掉
+                        if (totalNum < surprise_num) { //当发射烟火数量没到25
+                            var firework = Firework.getInstance(); //继续生成新的烟火
+                            init(firework);
+                            fireworkList.push(firework);
+                            totalNum++;
+                        }
+                        if (fireworkList.length == 0 && flag) { //发射生日快乐烟火和一箭穿心烟火
+                            var firework = Firework.getInstance();
+                            init(firework, {
+                                fireworkType: createCustomFirework,
+                                roundness: 1
+                            });
+                            fireworkList.push(firework);
+                            var firework2 = Firework.getInstance();
+                            init(firework2, {
+                                fireworkType: createDoubleHeartFirework,
+                                roundness: 1
+                            });
+                            fireworkList.push(firework2);
+                            flag = false;
+                        }
+                    }
+                }
+            }
+
+            var loop = function () {
+                draw();
+                update();
+                requestAnimationFrame(function () { //每秒触发60次的方法,因此动画是60帧的
+                    loop();
+                });
+            };
+
+            loop();
+        })
+    </script>
+</body>
+
+</html>
